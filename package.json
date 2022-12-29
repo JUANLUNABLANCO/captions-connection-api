@@ -1,0 +1,36 @@
+{
+    "name": "captions-connection-api",
+    "version": "1.0.0",
+    "description": "cc api server with node js",
+    "main": "index.js",
+    "scripts": {
+        "nodeDev": "cross-env NODE_ENV=development nodemon ./src/index.js",
+        "nodeTest": "cross-env NODE_ENV=testing nodemon --exec 'mocha -R min --timeout 8000' ",
+        "nodeTestCoverage": "nyc --reporter=text --reporter=lcov mocha --timeout 8000",
+        "nodeTest2": "cross-env NODE_ENV=testing mocha",
+        "nodeProdHere": "cross-env NODE_ENV=production nodemon ./src/index.js",
+        "nodeProd": "SET NODE_ENV=production && pm2 start ./src/server.js",
+        "start": "node .src/server.js",
+        "mongodTest": "mongod  --port 27017 --dbpath C:/data/db/DB_CCApp_test",
+        "mongodDev": "mongod --port 27017 --dbpath C:/data/db/DB_CCApp",
+        "mongodProd": "mongod --port 60060 --dbpath C:/data/db/DB_CC --auth",
+        "dockerImageFrontend": "docker build -t cc_frontend -f Dockerfile.frontend .",
+        "dockerImageBackend": "docker build -t cc_backend -f Dockerfile.backend .",
+        "dockerComposeUp": "docker-compose up",
+        "dockerComposeDown": "docker-compose down",
+        "dockerRmAll": "docker rm $(docker ps -aq)"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.1.0",
+        "cors": "^2.8.5",
+        "cross-env": "^7.0.3",
+        "express": "^4.18.2",
+        "mongoose": "^6.8.2"
+    },
+    "devDependencies": {
+        "dotenv": "^16.0.3",
+        "morgan": "^1.10.0"
+    }
+}
