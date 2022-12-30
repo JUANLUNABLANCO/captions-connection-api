@@ -1,3 +1,6 @@
+require('dotenv').config();
+global._ENV = process.env.NODE_ENV || "development";
+console.log(_ENV);
 /* ########### Server ############################################## */
 const Server = require("./app_server/server");
 /* ########### Server ############################################## */

@@ -1,4 +1,3 @@
-require('dotenv').config(); ////////////////////////////////////////////////////////////////////
 /* ##########  MODULOS O PAQUTES REQUERIDOS  #################### */
 const express = require("express");
 const app = express();
@@ -12,7 +11,7 @@ const https = require("https");
 ////////////////////////////////////////////////////////////////////
 /* ##########  CONFIGURACION DE EXPRESS      #################### */
 /* ####### CONFIGURATION  ####### */
-global._ENV = process.env.NODE_ENV || "development";
+// global._ENV = process.env.NODE_ENV || "development";
 
 const CONFIG =
     _ENV == "production" ?
