@@ -7,7 +7,7 @@ const configDB = {
     production: {
         host: "localhost",
         port: 27017,
-        database: "DB_captions_connection_prod",
+        database: "DB_CCApp_prod",
     }
 };
 
