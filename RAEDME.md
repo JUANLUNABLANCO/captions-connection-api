@@ -102,8 +102,28 @@ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -
 captions-connection-api
 > cd captions-connection-api  // /home/admin/www/captions-connection-api/
 
+// nosotros no necesitamos el .env, si en otro proyecto lo necesitaras debes crear el .env en la máquina virtual con los comandos siguientes y modificar el .env con las variables que nadie debe saber
 > cp .env.example .env
 > nano .env
+
+--- .env.example ---
+NODE_ENV=development
+IP=127.0.0.1
+HTTP_PORT=80
+--- ---
+--- .env ---
+NODE_ENV=production
+IP=172.26.9.208 // ip privada dentro de la red del VPS Machine
+HTTP_PORT=80
+--- ---
+
+Por otro lado las conexiones de la app-web desde angular se realizaban a http://127.0.0.1:3333/api en desarrollo y esto en producción deben hacerse a 
+la static ip de nuestra MV: 
+
+conexion desde el frontend a nuestra api:   15.188.175.15:80/api
+
+
+
 > npm install
 > pm2 start app.js
 > pm2 save
