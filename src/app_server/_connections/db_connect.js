@@ -29,19 +29,4 @@ mongoose.connect(uri, (error) => {
     }
 })
 
-
-// mongoose.connection
-//     .on("error", (err) => console.error.bind(console, "Connection:" + err)) // enlaza el track de error a la consola (proceso actual)
-//     .once("open", () => {
-//         console.log(
-//             `connection to database, in ` +
-//             _ENV +
-//             `, established well: ` +
-//             db.port
-//         );
-//         console.log(
-//             "**********************************************************************"
-//         );
-//     });
-
 module.exports = mongoose;
