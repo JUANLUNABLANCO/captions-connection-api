@@ -52,107 +52,62 @@ Juan Manuel Luna Blanco
 	 git push -u origin main
 
 
-## AZURE MICROSOFT (subir app_server)
+## AWS Lightsail
 
-Crear cuenta en azure de microsoft y seleccionar crear una web app
+servicio de vps en la nube
 
-creamos un recurso nuevo llamado: node_captionsconnection_app
-nombre del proyecto web: captionsconnection-api
-Publicar
-    Código                  --> por esta vez lo haremos con código desde github
-  	Contenedor Docker
-  	Aplicación web estática
-Pila de ejecución: Node 16.0LTS
-planes del servicio cambiar a Desarrollo y prueba Gratis 1GB de Ram
+Creamos la instancia básica con 'centos 10' estable VM de linux
+3.50€/m [512MB ram|20GB ssd|1 TB transferencia]
 
-Ahora vamos al recurso y aparece un panel, con un montón de opciones:
+nombre de la instancia: AWSVPScaptionsconnectionapp
 
-debes subir tu proyecto a github si no lo tenías y consumir la url del proyecto de github para usarlo en azure
+Hemos descargado las ssh keys, para conexión posterior por ssh
 
-    https://github.com/JUANLUNABLANCO/captions-connection-api.git
+nombre del recurso:     sshkey_ccserver_access.
+user name access:       admin
 
-en el proyecto de node deben cumplirse 2 cosas para poder ejecutarlo en azure:
+Luego hemos creado un recurso en network, una ip publica statica para este servidor privado.
 
-    1. necesitamos indicarle esta variable de entorno en algún sitio, para que escuche en el puerto que nos indique azure: process.env.PORT
-    en nuestro caso así queda el código:
+Nombre del recurso:     AWSVPS-CC-static-ip
+ip statica:             15.188.175.15
 
-        global._PORT = process.env.PORT || CONFIG.PORT;
+Ingresamos a la instancia por la consola, del panel en AWS.
 
-    2. scripts: {
-        start: "node src/server.js"
-    }
+> sudo apt-get update
+> sudo apt-get upgrade
+> curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+> sudo apt-get install -y nodejs
+> node --version
+> npm --version
+> sudo apt-get install libcap2-bin  // herramienta para ejecutar node por debajo del puerto 1024, nosotros lo haremos en el 80
+> sudo setcap cap_net_bind_service=+ep `readlink -f \`which node\`` // y esta es la configuración para que se pueda ejecutar por debajo del 1024
+> sudo npm install pm2 -g
+> pm2 ls
+> pm2 startup
 
-si seleccionas crea web app con bd te creará una: captions-connection-web-database
+// nos devuelve un comando para que pm2 se reinicie cuando la máquina empiece o se apague, es este:
 
-Ahora en Azure nos vamos al centro de implementación
-seleccionas github o donde tengas el proyecto, la rama y un para de cosas más y aceptar
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u admin --hp /home/admin
 
-te genera un archivo que debes copiar
+> sudo apt-get install git
+> pwd
+/home/admin
+> mkdir www
+> cd www
+> pwd
+/home/admin/www
 
---- .github/workflows/main_captionsconnection-api.yml ---
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+> git clone https://github.com/JUANLUNABLANCO/captions-connection-api.git
+> ls -la
+captions-connection-api
+> cd captions-connection-api  // /home/admin/www/captions-connection-api/
 
-name: Build and deploy Node.js app to Azure Web App - captions-connection
+> cp .env.example .env
+> nano .env
+> npm install
+> pm2 start app.js
+> pm2 save
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2		// cambiar a actions/checkout@v3
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v1
-        with:
-          node-version: '16.x'
-
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
-        with:
-          name: node-app
-          path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v2
-        with:
-          name: node-app
-
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'captions-connection'
-          slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_2b507f6e406b410594c8e7c39b279ef3 }}
-          package: .
---- ---
-    Guardar
-
-		la uri de la app subida es:
-
-    https://captions-connection.azurewebsites.net
-
-		Centro de implementación/ registros 
-    
-		

@@ -7,22 +7,8 @@ const db =
 
 if (_ENV === "testing" || _ENV === "development") {
     var uri = "mongodb://" + db.host + ":" + db.port + "/" + db.database;
-    console.log("URI-DB: " + uri);
 } else if (_ENV === "production") {
-    // #### MONGO_URL llega desde docker-compose.yml el otro es para productionHere sin docker
-    var uri =
-        process.env.MONGO_URL ||
-        "mongodb://" +
-        db.user +
-        ":" +
-        db.password +
-        "@" +
-        +db.host +
-        ":" +
-        db.port +
-        "/" +
-        db.database;
-    console.log("URI-DB: " + uri);
+    var uri = "mongodb://" + db.host + ":" + db.port + "/" + db.database;
 }
 mongoose.set('strictQuery', false);
 
@@ -41,7 +27,6 @@ mongoose.connect(uri, (error) => {
             "**********************************************************************"
         );
     }
-
 })
 
 
