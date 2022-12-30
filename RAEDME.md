@@ -125,8 +125,40 @@ conexion desde el frontend a nuestra api:   15.188.175.15:80/api
 
 
 > npm install
-> pm2 start app.js
-> pm2 save
+
+### Instalando mongod
+
+> sudo apt install -y gnupg
+> wget https://www.mongodb.org/static/pgp/server-5.0.asc -qO- | sudo apt-key add -
+> sudo nano /etc/apt/sources.list.d/mongodb-org.list
+--- .../mongodb-org.list ---
+deb http://repo.mongodb.org/apt/debian buster/mongodb-org/5.0 main
+--- ---
+[c^X] | y | [enter]
+
+> sudo apt update
+> sudo apt install -y mongodb-org
+> sudo systemctle enable --now mongod
+> sydtemctl status mongod
+
+// si algún problema borrar el .sock de la carpeta /tmp
+> ls *.sock
+> rm -rf ****.sock  // como se llame el mongod***.sock
+// esto tuve que hacerlo
+
+> mongosh
+> disableTelemetry()
+> exit
+
+En este punto se supone que está habilitado y arranca en el inicio de la máquina
+
+
+
+
+> pm2 start app.js  // o mejor aún 
+
+> npm run nodeProd //  "cross-env NODE_ENV=production && pm2 start ./src/index.js"
+> pm2 save  // graba la lista de procesos en ejecución
 
 
 
