@@ -9,7 +9,7 @@
         "nodeTestCoverage": "nyc --reporter=text --reporter=lcov mocha --timeout 8000",
         "nodeTest2": "cross-env NODE_ENV=testing mocha",
         "nodeProdHere": "cross-env NODE_ENV=production nodemon ./src/index.js",
-        "nodeProd": "NODE_ENV=production && pm2 start ./src/index.js",
+        "nodeProd": "pm2 start ./src/index.js ",
         "mongodTest": "mongod  --port 27017 --dbpath C:/data/db/DB_CCApp_test",
         "mongodDev": "mongod --port 27017 --dbpath C:/data/db/DB_CCApp",
         "mongodProd": "pm2 start mongod",
@@ -25,6 +25,7 @@
         "bcrypt": "^5.1.0",
         "cors": "^2.8.5",
         "cross-env": "^7.0.3",
+        "dotenv": "^16.0.3",
         "express": "^4.18.2",
         "mongoose": "^6.8.2"
     },
