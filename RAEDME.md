@@ -285,6 +285,7 @@ server {
 > sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 // WARNING no me queda claro hacerlo con nginx o sin nginx
+
 ## CREACIÓN DEL CERTIFICADO DENTRO DE LA MÁQUINA VIRTUAL
 
 > sudo nano /etc/apt/sources.list
@@ -314,6 +315,43 @@ Configurar la renovación automática del servicio
 
 
 
+## Intentemos otra cosa primero
+
+> sudo apt install ufw
+
+> sudo ufw status verbose
+
+> sudo ufw allow ssh   	// 22
+> sudo ufw allow http		// 80
+> sudo ufw allow https	// 443
+
+> sudo ufw status verbose
+
+> sudo ufw enable
+
+> sudo ufw status verbose
+
+en node.js hemos activado las credenciales para https
+--- app_server/server.js ---
+f (_ENV == "production") {
+    // app.use(cors()); // HASK: ############# CORS CONFIGURATION IN PRODUCTION
+    const credentials = {
+        ca: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.ca-bundle", 'utf8'), //la certification authority o CA
+        key: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.key", 'utf8'), //la clave SSL, que es el primer archivo que generamos ;)
+        cert: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.crt", 'utf8') //el certificado
+    };
+    var _server = https
+        .createServer(credentials, api)
+        .listen(api.get("port"), function() {
+            console.log("NODE_ENV: " + api.get("env"));
+            console.log(
+                "Express server with SSL certificate listening in https://www.captions-connection-app.net:" +
+                _server.address().port
+            );
+        });
+}
+--- ---
+esto ahbilita el https y la app se ejecutará en el puerto 443
 
 
 

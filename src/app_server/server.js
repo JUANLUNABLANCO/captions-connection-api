@@ -9,6 +9,8 @@ const api = require("./app");
 // servidor secure layer transport SSL https://www.avr3dstudio.com:3000
 if (_ENV == "production") {
     // app.use(cors()); // HASK: ############# CORS CONFIGURATION IN PRODUCTION
+    global._PORT = 443;
+    app.set("port", _PORT);
     const credentials = {
         ca: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.ca-bundle", 'utf8'), //la certification authority o CA
         key: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.key", 'utf8'), //la clave SSL, que es el primer archivo que generamos ;)
