@@ -1,5 +1,7 @@
 /* ##########  MODULOS O PAQUTES REQUERIDOS  #################### */
-const https = require("https"); /////////////////////////////////////////////////////////////////////////
+const https = require("https");
+const fs = require("fs"); /////
+const path = require("path"); ///////////////////////////////////////////////////////////////////
 /* ##########  api - express            ################################# */
 const api = require("./app");
 /* ##########  api - express            ################################# */
@@ -10,9 +12,9 @@ const api = require("./app");
 if (_ENV == "production") {
     // app.use(cors()); // HASK: ############# CORS CONFIGURATION IN PRODUCTION
     const credentials = {
-        ca: fs.readFileSync(__dirname + "_configs/ssl/captionsconnection_net.ca-bundle", 'utf8'), //la certification authority o CA
-        key: fs.readFileSync(__dirname + "_configs/ssl/captionsconnection_net.key", 'utf8'), //la clave SSL, que es el primer archivo que generamos ;)
-        cert: fs.readFileSync(__dirname + "_configs/ssl/captionsconnection_net.crt", 'utf8') //el certificado
+        ca: fs.readFileSync(path.join(__dirname, "_configs/ssl/captionsconnection_net.ca-bundle"), 'utf8'), //la certification authority o CA
+        key: fs.readFileSync(path.join(__dirname, "_configs/ssl/captionsconnection_net.key"), 'utf8'), //la clave SSL, que es el primer archivo que generamos ;)
+        cert: fs.readFileSync(path.join(__dirname, "_configs/ssl/captionsconnection_net.crt"), 'utf8') //el certificado
     };
     var _server = https
         .createServer(credentials, api)
