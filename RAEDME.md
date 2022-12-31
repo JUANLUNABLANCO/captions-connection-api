@@ -54,6 +54,12 @@ Juan Manuel Luna Blanco
 
 ## AWS Lightsail
 
+https://lightsail.aws.amazon.com/ls/webapp/eu-west-3/instances/AWSVPScaptionsconnectionapp/connect
+ese es nuestro panel.
+
+https://lightsail.aws.amazon.com/ls/webapp/home/instances?#
+y este el home de lightsail
+
 servicio de vps en la nube
 
 Creamos la instancia básica con 'centos 10' estable VM de linux
@@ -71,11 +77,11 @@ Luego hemos creado un recurso en network, una ip publica statica para este servi
 Nombre del recurso:     AWSVPS-CC-static-ip
 ip statica:             15.188.175.15
 
-Ingresamos a la instancia por la consola, del panel en AWS.
+Ingresamos a la instancia por la consola, del panel en AWS. En el futuro ingresaremos por ssh desde el pc, con las klaves ssh
 
 > sudo apt-get update
 > sudo apt-get upgrade
-> curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+> curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -		// obtener el irectorio de node para instalar
 > sudo apt-get install -y nodejs
 > node --version
 > npm --version
@@ -83,11 +89,9 @@ Ingresamos a la instancia por la consola, del panel en AWS.
 > sudo setcap cap_net_bind_service=+ep `readlink -f \`which node\`` // y esta es la configuración para que se pueda ejecutar por debajo del 1024
 > sudo npm install pm2 -g
 > pm2 ls
-> pm2 startup
+> pm2 startup	// nos devuelve un comando para que pm2 se reinicie cuando la máquina empiece o se apague, es este:
 
-// nos devuelve un comando para que pm2 se reinicie cuando la máquina empiece o se apague, es este:
-
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u admin --hp /home/admin
+> sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u admin --hp /home/admin
 
 > sudo apt-get install git
 > pwd
@@ -102,7 +106,8 @@ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -
 captions-connection-api
 > cd captions-connection-api  // /home/admin/www/captions-connection-api/
 
-// nosotros no necesitamos el .env, si en otro proyecto lo necesitaras debes crear el .env en la máquina virtual con los comandos siguientes y modificar el .env con las variables que nadie debe saber
+Nosotros necesitaremos el .env, copias el .env.example con variables de desarrollo y pones las variables con los valores para producción. Esto te ahorrará quebraderos de cabeza sobre el NODE_ENV y cross-env
+
 > cp .env.example .env
 > nano .env
 
@@ -116,12 +121,6 @@ NODE_ENV=production
 IP=172.26.9.208 // ip privada dentro de la red del VPS Machine
 HTTP_PORT=80
 --- ---
-
-Por otro lado las conexiones de la app-web desde angular se realizaban a http://127.0.0.1:3333/api en desarrollo y esto en producción deben hacerse a 
-la static ip de nuestra MV: 
-
-conexion desde el frontend a nuestra api:   15.188.175.15:80/api
-
 
 
 > npm install
@@ -150,15 +149,174 @@ deb http://repo.mongodb.org/apt/debian buster/mongodb-org/5.0 main
 > disableTelemetry()
 > exit
 
-En este punto se supone que está habilitado y arranca en el inicio de la máquina
+// si tienes problemas con el puerto > sudo ufw allow 27017
 
+En este punto se supone que está habilitado y arranca en el inicio de la máquina
 
 
 
 > pm2 start app.js  // o mejor aún 
 
-> npm run nodeProd //  "cross-env NODE_ENV=production && pm2 start ./src/index.js"
-> pm2 save  // graba la lista de procesos en ejecución
+> npm run nodeProd //  "pm2 start ./src/index.js"
+> pm2 save  // graba la lista de procesos en ejecución para que se lancen cuando empiece la máquina
+
+Ahora ya tenemos en esta ip la api funcionando:
+
+http://15.188.175.15:80/api
+
+es hora de confgiurar el frontend para acceder a esa url.
+
+Las conexiones de la app-web desde angular se realizaban a http://127.0.0.1:3333/api en desarrollo y esto en producción deben hacerse a 
+la static ip de nuestra MV: 
+
+conexion desde el frontend a nuestra api:   
+
+http://15.188.175.15:80/api
+
+Debes cambiarlo en la app frontend con angular 'captions-connection-web'
+ http://localhost:3333/api/channel/check-channel-exists debes cambiar el host:puerto/endpoint:
+ 
+ http://localhost:3333/api/
+
+ por esto otro:
+
+ http://15.188.175.15:80/api
+
+ También en los cors de la app-server 'captions-connection-api', tenemos que modificar la constante de INCOMMING_URL_HTTPACCESS_PERMITED= http://localhost:4200
+
+ por esto otro:
+
+ INCOMMING_URL_HTTPACCESS_PERMITED= https://captions-connection-web.netlify.app
+
+ Esto está hecho, ahora no accede debido a que estamos realizando una petición desde un dominio seguro:
+
+ https://captions-connection-web.netlify.app  hacia un http://15.188.175.15:80/api y cors no nos lo permite lo bloquea, por ello debes registrar un dominio en aws y crear un recurso de DNS para tu app-server
+
+ ## CREACION DE DOMINO EN AWS
+
+	ns-1217.awsdns-24.org
+
+	ns-1983.awsdns-55.co.uk
+
+	ns-618.awsdns-13.net
+
+	ns-193.awsdns-24.com
+
+	DNS: https://captions-connection-app.net
+
+	11 $/y fecha vencimiento: 31/12/2023 autoreneival: true
+
+	en el menú de DOMAINS, debes asignar el recurso de DNS creado al recurso:
+
+	'AWSVPS-CC-static-ip', es decir a la ip statica y pública que correponde a nuestra máquina:
+
+	http://15.188.175.15:80
+
+	Con el objetivo que cada vez que llamemos a https://captions-connection-app.net, nos lleve a esa ip
+
+	y por tanto debemos cambiar en el frontend la
+
+	baseUrl="http://15.188.175.15:80/api"
+
+	por esto otro 
+
+	baseUrl="https://captions-connection-app.net/api"
+
+	Se encuentra en .environment.prod.ts
+
+	Tras los cambios recuerda subir el dist a netlify ejecutando estos comandos
+
+	> ng build --prod
+	> netlify deploy --prod
+	dist
+
+## Instalar y configurar nginx
+
+esto solo es necesario si tienes en el mismo dominio 2 apps en difernetes puertos, que no es nuestro caso, porque solo tenemos la app de node.js. 
+Por ejemplo:
+
+	app A con angular: contenido estático
+	http://tudominio:4200
+
+	app B con nodejs: app server
+	http://tudominio:3000
+
+	entonces sí lo instalaríamos
+
+> sudo apt install nginx
+
+> sudo systemctl status nginx
+
+> sudo ufw allow 'Nginx Full'
+
+> sudo mkdir -p /var/www
+> sudo chown -R admin:admin /var/www
+
+> sudo nano /etc/nginx/sites-available/default
+
+--- default ---
+server {
+  listen 0.0.0.0:80;  // :80 o :443
+
+  root /var/www/captions-connection-web/captions-connection-app;
+  index index.html index.htm;
+  server_name captions-connection-app.net;
+  access_log /var/log/nginx/captions-connection-app.access.log;
+  error_log /var/log/nginx/captions-connection-app.error.log debug;
+
+  location / {
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarder-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-NginX-Proxy true;
+
+    proxy_pass http://captions-connection-app.net;   // http o htttps
+    proxy_redirect off;
+  }
+}
+--- ---
+--- /etc/hosts ---
+127.0.0.1         localhost
+127.0.0.1         admin
+15.188.175.15:80 	captions-connection-app.net							// ?? debe llevar el :80 o no?
+--- ---
+
+> sudo service nginx restart
+> sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+// WARNING no me queda claro hacerlo con nginx o sin nginx
+## CREACIÓN DEL CERTIFICADO DENTRO DE LA MÁQUINA VIRTUAL
+
+> sudo nano /etc/apt/sources.list
+
+--- sources.list ---
+deb http://ftp.debian.org/debian buster-backports main
+--- ---
+
+
+> sudo apt-get update
+> sudo apt-install python-certboot
+
+> sudo service nginx stop  // o apache o lo que tengas corriendo, en mi caso nada
+
+> sudo certbot certonly --standalone -d captions-connection-app.net -d www.captions-connection-app.net
+
+> sudo service nginx start
+
+// // WARNING no me queda claro hacerlo con nginx o sin nginx, si no tienes nginx cambia el comando??, como 
+// se redirecciona hacia el puerto 443
+
+Configurar la renovación automática del servicio
+
+> sudo sh -c 'printf "#!/bin/sh\n service nginx stop \n" > /etc/letsencrypt/renewal-hooks/pre/webservice.sh'
+> sudo sh -c 'printf "#!/bin/sh\n service nginx start \n" > /etc/letsencrypt/renewal-hooks/post/webservice.sh'
+> sudo chmod 755 /etc/letsencrypt/renewal-hooks/*/webservice.sh
+
+
+
+
+
+
 
 
 

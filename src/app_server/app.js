@@ -3,7 +3,6 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const cors = require("cors"); //  console colors
-const https = require("https");
 /* ##########  MODULOS O PAQUTES REQUERIDOS  #################### */
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
