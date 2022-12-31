@@ -220,7 +220,7 @@ Debes cambiarlo en la app frontend con angular 'captions-connection-web'
 
 	por esto otro 
 
-	baseUrl="https://captions-connection-app.net/api"
+	baseUrl="https://captions-connection-app.net/api"  // o  https://15.188.175.15:443/api
 
 	Se encuentra en .environment.prod.ts
 
@@ -229,6 +229,24 @@ Debes cambiarlo en la app frontend con angular 'captions-connection-web'
 	> ng build --prod
 	> netlify deploy --prod
 	dist
+
+
+
+## Intentemos otra cosa primero
+
+> sudo apt install ufw
+
+> sudo ufw status verbose
+
+> sudo ufw allow ssh   	// 22
+> sudo ufw allow http		// 80
+> sudo ufw allow https	// 443
+
+> sudo ufw status verbose
+
+> sudo ufw enable
+
+> sudo ufw status verbose
 
 ## Instalar y configurar nginx
 
@@ -243,35 +261,38 @@ Por ejemplo:
 
 	entonces sí lo instalaríamos
 
-> sudo apt install nginx
+> sudo apt-get install nginx
+
+> sudo chown -R admin /home/admin/www // o sudo chown -R admin:admin ~/www ??
 
 > sudo systemctl status nginx
 
 > sudo ufw allow 'Nginx Full'
+> sudo ufw status
 
-> sudo mkdir -p /var/www
-> sudo chown -R admin:admin /var/www
+> sudo touch /var/log/nginx/captions-connection-app.access.log
+> sudo touch /var/log/nginx/captions-connection-app.error.log
+> ls -la /var/log/nginx
 
 > sudo nano /etc/nginx/sites-available/default
 
 --- default ---
 server {
-  listen 0.0.0.0:80;  // :80 o :443
+  listen 0.0.0.0:443;
 
-  root /var/www/captions-connection-web/captions-connection-app;
+  root /home/admin/www/captions-connection-api;
   index index.html index.htm;
   server_name captions-connection-app.net;
   access_log /var/log/nginx/captions-connection-app.access.log;
   error_log /var/log/nginx/captions-connection-app.error.log debug;
 
   location / {
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarder-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
-    proxy_set_header X-NginX-Proxy true;
-
-    proxy_pass http://captions-connection-app.net;   // http o htttps
-    proxy_redirect off;
+		proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
   }
 }
 --- ---
@@ -315,43 +336,6 @@ Configurar la renovación automática del servicio
 
 
 
-## Intentemos otra cosa primero
-
-> sudo apt install ufw
-
-> sudo ufw status verbose
-
-> sudo ufw allow ssh   	// 22
-> sudo ufw allow http		// 80
-> sudo ufw allow https	// 443
-
-> sudo ufw status verbose
-
-> sudo ufw enable
-
-> sudo ufw status verbose
-
-en node.js hemos activado las credenciales para https
---- app_server/server.js ---
-if (_ENV == "production") {
-    // app.use(cors()); // HASK: ############# CORS CONFIGURATION IN PRODUCTION
-    const credentials = {
-        ca: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.ca-bundle", 'utf8'), //la certification authority o CA
-        key: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.key", 'utf8'), //la clave SSL, que es el primer archivo que generamos ;)
-        cert: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.crt", 'utf8') //el certificado
-    };
-    var _server = https
-        .createServer(credentials, api)
-        .listen(api.get("port"), function() {
-            console.log("NODE_ENV: " + api.get("env"));
-            console.log(
-                "Express server with SSL certificate listening in https://www.captions-connection-app.net:" +
-                _server.address().port
-            );
-        });
-}
---- ---
-esto ahbilita el https y la app se ejecutará en el puerto 443
 
 
 
