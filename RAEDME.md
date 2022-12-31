@@ -333,7 +333,7 @@ Configurar la renovación automática del servicio
 
 en node.js hemos activado las credenciales para https
 --- app_server/server.js ---
-f (_ENV == "production") {
+if (_ENV == "production") {
     // app.use(cors()); // HASK: ############# CORS CONFIGURATION IN PRODUCTION
     const credentials = {
         ca: fs.readFileSync(__dirname + "/_configs/ssl/captionsconnection_net.ca-bundle", 'utf8'), //la certification authority o CA

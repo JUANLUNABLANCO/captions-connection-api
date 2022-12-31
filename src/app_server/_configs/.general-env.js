@@ -2,7 +2,7 @@
 
 var configGENERAL = {
     production: {
-        PORT: 80,
+        PORT: 443,
         URLBASE: "http://localhost:80/api",
         INCOMMING_URL_HTTPACCESS_PERMITED: "https://captions-connection-web.netlify.app", // cors peticiones aceptadas desde angular
         CONSOLE: {
